@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Energy | Gestão Inteligente</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header id="mainHeader" class="hidden">
+        <div class="logo">
+            <i class="fa-solid fa-bolt"></i> My Energy
+        </div>
+        <nav>
+            <button data-view="dashboard" class="nav-btn active"><i class="fa-solid fa-chart-line"></i> <span class="desktop-only">Dashboard</span></button>
+            <button data-view="clients" id="navClients" class="nav-btn"><i class="fa-solid fa-users"></i> <span class="desktop-only">Clientes</span></button>
+            <button data-view="users" id="navUsers" class="nav-btn admin-only"><i class="fa-solid fa-user-shield"></i> <span class="desktop-only">Usuários</span></button>
+            <button data-view="settings" class="nav-btn"><i class="fa-solid fa-gear"></i> <span class="desktop-only">Ajustes</span></button>
+        </nav>
+        <div class="user-actions">
+            <button id="themeToggle" class="icon-btn" title="Alternar Tema"><i class="fa-solid fa-moon"></i></button>
+            <button id="logoutBtn" class="icon-btn danger" title="Sair"><i class="fa-solid fa-right-from-bracket"></i></button>
+        </div>
+    </header>
+
+    <main>
+        <section id="view-auth" class="view">
+            <div class="auth-container">
+                <div class="auth-box">
+                    <div class="brand">
+                        <div class="logo-circle"><i class="fa-solid fa-bolt"></i></div>
+                        <h1>My Energy</h1>
+                        <p>Gestão de consumo simplificada</p>
+                    </div>
+
+                    <form id="formLogin">
+                        <div class="input-group">
+                            <i class="fa-solid fa-envelope"></i>
+                            <input type="email" id="loginEmail" placeholder="Seu e-mail" required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" id="loginPassword" placeholder="Sua senha" required>
+                        </div>
+                        <button type="submit" class="btn-primary full">Entrar</button>
+                    </form>
+
+                    <form id="formRegister" class="hidden">
+                        <div class="input-group">
+                            <i class="fa-solid fa-user"></i>
+                            <input type="text" id="regName" placeholder="Nome completo" required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fa-solid fa-envelope"></i>
+                            <input type="email" id="regEmail" placeholder="Seu e-mail" required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" id="regPassword" placeholder="Crie uma senha" required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fa-solid fa-id-badge"></i>
+                            <select id="regRole">
+                                <option value="user">Usuário Comum</option>
+                                <option value="admin">Administrador</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-primary full">Criar Conta</button>
+                    </form>
+
+                    <div class="auth-toggle">
+                        <p id="txtLogin">Não tem conta? <a href="#" id="toRegister">Cadastre-se</a></p>
+                        <p id="txtRegister" class="hidden">Já tem conta? <a href="#" id="toLogin">Faça Login</a></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-dashboard" class="view hidden">
+            <div class="header-view">
+                <h2>Dashboard</h2>
+                <div class="filters">
+                    <div class="custom-select" id="dashClientFilter">
+                        <select id="selDashClient"></select>
+                    </div>
+                    <div class="custom-select">
+                        <select id="selDashHouse">
+                            <option value="">Selecione uma residência...</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kpi-grid">
+                <div class="card kpi">
+                    <div class="icon bg-blue"><i class="fa-solid fa-plug"></i></div>
+                    <div class="info">
+                        <h3>Consumo Total</h3>
+                        <p id="kpiTotal">0 kWh</p>
+                    </div>
+                </div>
+                <div class="card kpi">
+                    <div class="icon bg-green"><i class="fa-solid fa-chart-area"></i></div>
+                    <div class="info">
+                        <h3>Média / Reg.</h3>
+                        <p id="kpiAvg">0 kWh</p>
+                    </div>
+                </div>
+                <div class="card kpi">
+                    <div class="icon bg-purple"><i class="fa-solid fa-house"></i></div>
+                    <div class="info">
+                        <h3>Residências</h3>
+                        <p id="kpiHouses">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2-1">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Histórico de Consumo</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="mainChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Adicionar Registro</h3>
+                    </div>
+                    <form id="formConsumption">
+                        <div class="form-group">
+                            <label>Data</label>
+                            <input type="date" id="conDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Consumo (kWh)</label>
+                            <input type="number" id="conKwh" step="0.01" placeholder="0.00" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Nota (Opcional)</label>
+                            <input type="text" id="conNote" placeholder="Ex: Ar condicionado">
+                        </div>
+                        <button type="submit" class="btn-primary full">Salvar</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3>Registros Recentes</h3>
+                </div>
+                <div class="table-responsive">
+                    <table class="table" id="tableConsumption">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Consumo</th>
+                                <th>Nota</th>
+                                <th class="text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-clients" class="view hidden">
+            <div class="header-view">
+                <h2 id="clientsPageTitle">Gerenciar Clientes</h2>
+            </div>
+            
+            <div class="grid-1-1">
+                <div class="card" id="cardClientsManager">
+                    <div class="card-header">
+                        <h3>Clientes</h3>
+                        <button class="btn-small" id="btnNewClient"><i class="fa-solid fa-plus"></i> Novo</button>
+                    </div>
+                    <div class="list-group" id="listClients"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 id="houseListTitle">Residências</h3>
+                        <button class="btn-small" id="btnNewHouse"><i class="fa-solid fa-plus"></i> Nova</button>
+                    </div>
+                    <div class="list-group" id="listHouses">
+                        <div class="empty-state">Selecione um cliente para ver as casas.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-users" class="view hidden">
+            <div class="header-view">
+                <h2>Controle de Acesso</h2>
+                <button class="btn-primary" id="btnNewUser"><i class="fa-solid fa-user-plus"></i> Adicionar Usuário</button>
+            </div>
+            <div class="card">
+                <div class="table-responsive">
+                    <table class="table" id="tableUsers">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Papel</th>
+                                <th class="text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-settings" class="view hidden">
+            <div class="settings-container">
+                <div class="card auth-card"> <div class="brand">
+                        <div class="logo-circle"><i class="fa-solid fa-user-gear"></i></div>
+                        <h2>Meu Perfil</h2>
+                    </div>
+                    <form id="formProfile">
+                        <div class="input-group">
+                            <label>Nome</label>
+                            <input type="text" id="profName">
+                        </div>
+                        <div class="input-group">
+                            <label>Email (Fixo)</label>
+                            <input type="email" id="profEmail" disabled>
+                        </div>
+                        <div class="input-group">
+                            <label>Nova Senha</label>
+                            <input type="password" id="profPass" placeholder="Deixe em branco para manter">
+                        </div>
+                        <button type="submit" class="btn-primary full">Salvar Alterações</button>
+                    </form>
+                </div>
+
+                <div class="card mt-4 p-4 text-center">
+                    <h3><i class="fa-solid fa-database"></i> Backup de Dados</h3>
+                    <p class="muted">Como usamos armazenamento local, é recomendável exportar seus dados periodicamente.</p>
+                    <div class="flex-center gap-2 mt-2">
+                        <button id="btnExport" class="btn-outline"><i class="fa-solid fa-download"></i> Exportar JSON</button>
+                        <label for="fileImport" class="btn-outline cursor-pointer"><i class="fa-solid fa-upload"></i> Importar</label>
+                        <input type="file" id="fileImport" accept=".json" class="hidden">
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="toast" class="toast hidden">Mensagem aqui</div>
+
+ <script src="js/app.js"></script>
+</body>
+</html>
