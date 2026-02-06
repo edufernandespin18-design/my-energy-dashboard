@@ -1,10 +1,1 @@
-# Arquivos de sistema operacional (lixo)
-.DS_Store
-Thumbs.db
 
-# Logs de erro (se houver)
-*.log
-
-# Dependências (não usamos agora, mas é boa prática deixar aqui)
-node_modules/
-.env
